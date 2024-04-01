@@ -4,10 +4,10 @@ import code
 from imagernn.utils import initw
 
 class LSTMGenerator:
-  """ 
+  """
   A multimodal long short-term memory (LSTM) generator
   """
-  
+
   @staticmethod
   def init(input_size, hidden_size, output_size):
 
@@ -64,7 +64,7 @@ class LSTMGenerator:
     IFOG = np.zeros((n, d * 4))
     IFOGf = np.zeros((n, d * 4)) # after nonlinearity
     C = np.zeros((n, d))
-    for t in xrange(n):
+    for t in range(n):
       # set input
       prev = np.zeros(d) if t == 0 else Hout[t-1]
       Hin[t,0] = 1
@@ -73,7 +73,7 @@ class LSTMGenerator:
 
       # compute all gate activations. dots:
       IFOG[t] = Hin[t].dot(WLSTM)
-      
+
       # non-linearities
       IFOGf[t,:3*d] = 1.0/(1.0+np.exp(-IFOG[t,:3*d])) # sigmoids; these are the gates
       IFOGf[t,3*d:] = np.tanh(IFOG[t, 3*d:]) # tanh
@@ -97,7 +97,7 @@ class LSTMGenerator:
     bd = model['bd']
     # NOTE1: we are leaving out the first prediction, which was made for the image
     # and is meaningless.
-    Y = Hout[1:, :].dot(Wd) + bd 
+    Y = Hout[1:, :].dot(Wd) + bd
 
     cache = {}
     if not predict_mode:
@@ -154,7 +154,7 @@ class LSTMGenerator:
     dHin = np.zeros(Hin.shape)
     dC = np.zeros(C.shape)
     dX = np.zeros(X.shape)
-    for t in reversed(xrange(n)):
+    for t in reversed(range(n)):
 
       if tanhC_version:
         tanhCt = np.tanh(C[t]) # recompute this here
@@ -170,7 +170,7 @@ class LSTMGenerator:
         dC[t-1] += IFOGf[t,d:2*d] * dC[t]
       dIFOGf[t,:d] = IFOGf[t, 3*d:] * dC[t]
       dIFOGf[t, 3*d:] = IFOGf[t,:d] * dC[t]
-      
+
       # backprop activation functions
       dIFOG[t,3*d:] = (1 - IFOGf[t, 3*d:] ** 2) * dIFOGf[t,3*d:]
       y = IFOGf[t,:3*d]
@@ -192,8 +192,8 @@ class LSTMGenerator:
 
   @staticmethod
   def predict(Xi, model, Ws, params, **kwargs):
-    """ 
-    Run in prediction mode with beam search. The input is the vector Xi, which 
+    """
+    Run in prediction mode with beam search. The input is the vector Xi, which
     should be a 1-D array that contains the encoded image vector. We go from there.
     Ws should be NxD array where N is size of vocabulary + 1. So there should be exactly
     as many rows in Ws as there are outputs in the decoder Y. We are passing in Ws like
@@ -236,13 +236,13 @@ class LSTMGenerator:
 
     # forward prop the image
     (y0, h, c) = LSTMtick(Xi, np.zeros(d), np.zeros(d))
-    
+
     # perform BEAM search. NOTE: I am not very confident in this implementation since I don't have
     # a lot of experience with these models. This implements my current understanding but I'm not
     # sure how to handle beams that predict END tokens. TODO: research this more.
     if beam_size > 1:
       # log probability, indices of words predicted in this beam so far, and the hidden and cell states
-      beams = [(0.0, [], h, c)] 
+      beams = [(0.0, [], h, c)]
       nsteps = 0
       while True:
         beam_candidates = []
@@ -259,7 +259,7 @@ class LSTMGenerator:
           p1 = e1 / np.sum(e1)
           y1 = np.log(1e-20 + p1) # and back to log domain
           top_indices = np.argsort(-y1)  # we do -y because we want decreasing order
-          for i in xrange(beam_size):
+          for i in range(beam_size):
             wordix = top_indices[i]
             beam_candidates.append((b[0] + y1[wordix], b[1] + [wordix], h1, c1))
         beam_candidates.sort(reverse = True) # decreasing order
