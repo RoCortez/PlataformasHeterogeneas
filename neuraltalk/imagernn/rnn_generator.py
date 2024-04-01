@@ -4,12 +4,12 @@ import code
 from imagernn.utils import initw
 
 class RNNGenerator:
-  """ 
+  """
   An RNN generator.
   This class is as stupid as possible. It gets some conditioning vector,
   a sequence of input vectors, and produces a sequence of output vectors
   """
-  
+
   @staticmethod
   def init(input_size, hidden_size, output_size):
 
@@ -73,8 +73,8 @@ class RNNGenerator:
     H = np.zeros((n, d)) # hidden layer representation
     Whh = model['Whh']
     bhh = model['bhh']
-    for t in xrange(n):
-      
+    for t in range(n):
+
       prev = np.zeros(d) if t == 0 else H[t-1]
       if not rnn_feed_once or t == 0:
         # feed the image in if feedonce is false. And it it is true, then
@@ -108,7 +108,7 @@ class RNNGenerator:
       cache['drop_prob_encoder'] = drop_prob_encoder
       cache['drop_prob_decoder'] = drop_prob_decoder
       cache['rnn_feed_once'] = rnn_feed_once
-      if drop_prob_encoder > 0: 
+      if drop_prob_encoder > 0:
         cache['Us'] = Us # keep the dropout masks around for backprop
         cache['Ui'] = Ui
       if drop_prob_decoder > 0: cache['U2'] = U2
@@ -145,12 +145,12 @@ class RNNGenerator:
     dXi = np.zeros(d)
     dWhh = np.zeros(Whh.shape)
     dbhh = np.zeros((1,d))
-    for t in reversed(xrange(n)):
+    for t in reversed(range(n)):
       dht = (H[t] > 0) * dH[t] # backprop ReLU
 
       if not rnn_feed_once or t == 0:
         dXi += dht # backprop to Xi
-        
+
       dXsh[t] += dht # backprop to word encodings
       dbhh[0] += dht # backprop to bias
 
@@ -176,7 +176,7 @@ class RNNGenerator:
 
   @staticmethod
   def predict(Xi, model, Ws, params, **kwargs):
-    
+
     beam_size = kwargs.get('beam_size', 1)
     relu_encoders = params.get('rnn_relu_encoders', 0)
     rnn_feed_once = params.get('rnn_feed_once', 0)
@@ -197,7 +197,7 @@ class RNNGenerator:
       # NOTE: code duplication here with lstm_generator
       # ideally the beam search would be abstracted away nicely and would take
       # a TICK function or something, but for now lets save time & copy code around. Sorry ;\
-      beams = [(0.0, [], np.zeros(d))] 
+      beams = [(0.0, [], np.zeros(d))]
       nsteps = 0
       while True:
         beam_candidates = []
