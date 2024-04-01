@@ -13,8 +13,8 @@ def decodeGenerator(generator):
     raise Exception('generator %s is not yet supported' % (base_generator_str,))
 
 class GenericBatchGenerator:
-  """ 
-  Base batch generator class. 
+  """
+  Base batch generator class.
   This class is aware of the fact that we are generating
   sentences from images.
   """
@@ -61,13 +61,13 @@ class GenericBatchGenerator:
     # encode all images
     # concatenate as rows. If N is number of image-sentence pairs,
     # F will be N x image_size
-    F = np.row_stack(x['image']['feat'] for x in batch) 
+    F = np.row_stack(x['image']['feat'] for x in batch)
     We = model['We']
     be = model['be']
     Xe = F.dot(We) + be # Xe becomes N x image_encoding_size
 
     # decode the generator we wish to use
-    generator_str = params.get('generator', 'lstm') 
+    generator_str = params.get('generator', 'lstm')
     Generator = decodeGenerator(generator_str)
 
     # encode all words in all sentences (which exist in our vocab)
@@ -100,7 +100,7 @@ class GenericBatchGenerator:
       cache['generator_str'] = generator_str
 
     return Ys, cache
-    
+
   @staticmethod
   def backward(dY, cache):
     Xe = cache['Xe']
@@ -138,7 +138,7 @@ class GenericBatchGenerator:
   @staticmethod
   def predict(batch, model, params, **kwparams):
     """ some code duplication here with forward pass, but I think we want the freedom in future """
-    F = np.row_stack(x['image']['feat'] for x in batch) 
+    F = np.row_stack(x['image']['feat'] for x in batch)
     We = model['We']
     be = model['be']
     Xe = F.dot(We) + be # Xe becomes N x image_encoding_size
@@ -149,5 +149,3 @@ class GenericBatchGenerator:
       gen_Y = Generator.predict(Xe[i, :], model, model['Ws'], params, **kwparams)
       Ys.append(gen_Y)
     return Ys
-
-
